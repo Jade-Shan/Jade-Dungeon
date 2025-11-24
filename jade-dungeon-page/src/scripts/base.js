@@ -126,8 +126,9 @@ var net = net || {};
 		var html = '<div class="col-sm-6 col-md-3"><div class="thumbnail">';
 		html = html + '<img onClick="javascript:net.jadedungeon.viewPic(this)" id="' + itm.id + '" src="' + itm.url +'" alt="' + 
 			itm.title +'"></div>';
-		html = html + '<div class="caption"><h3>' + itm.title + '</h3><p>' + 
-			itm.desc + '</p></div></div>';
+		html = html + '<div class="caption">' + 
+			// '<h3>' + itm.title + '</h3>' + 
+			'<p>' + itm.desc + '</p></div></div>';
 		return html;
 	};
 
