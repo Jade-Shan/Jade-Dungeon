@@ -114,5 +114,46 @@ net.jadedungeon.changeTheme(theme);
 // 	const webamp = new Webamp();
 // 	webamp.renderWhenReady(webAmpDiv);
 // }
+
+
+
+function throttle(fn, delay, atleast) {
+	var timeout = null;
+	var startTime = new Date();
+	return function () {
+		var curTime = new Date();
+		clearTimeout(timeout);
+		if (curTime - startTime >= atleast) {
+			fn();
+			startTime = curTime;
+		} else {
+			timeout = setTimeout(fn, delay);
+		}
+	}
+};
+
+function lazyload() {
+	var images = document.querySelectorAll('div#articles.content>div.row img[data-src]');
+	var len = images.length;
+	var n = 0;      //存储图片加载到的位置，避免每次都从第一张图片开始遍历        
+	return function () {
+		var seeHeight = document.documentElement.clientHeight;
+		var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+		for (var i = n; i < len; i++) {
+			if (images[i].offsetTop < seeHeight + scrollTop) {
+				if (images[i].getAttribute('src') !== images[i].getAttribute('data-src')) {
+					images[i].src = images[i].getAttribute('data-src');
+				}
+				n = n + 1;
+			}
+		}
+	}
+};
+var lazyLoadImages = lazyload();
+// 初始化首页的页面图片
+lazyLoadImages();
+// window.addEventListener('scroll', loadImages, false); //会被高频触发，这非常影响浏览器的性能
+window.addEventListener('scroll', throttle(lazyLoadImages, 500, 1000), false); //设置500ms 的延迟，和 1000ms 的间隔　避免高频防抖
+
 </script>
 </html>

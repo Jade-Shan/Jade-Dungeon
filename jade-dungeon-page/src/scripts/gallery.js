@@ -47,6 +47,9 @@
 				if ('success' == data.status) {
 					self.renderGallery(data);
 					$('html,body').animate({scrollTop:0},700);
+					//初始化首页的页面图片
+					var lazyLoadImages = lazyload();
+					lazyLoadImages();
 				} else {
 					console.error("加载相册失败");
 				}
