@@ -22,7 +22,7 @@
 			html = html + net.jadedungeon.renderArticle(itm);
 		});
 		html = html + net.jadedungeon.renderPagination(
-			data.page, data.count, "page.loadPage");
+			data.page, data.pageCount, "page.loadPage");
 		$("#articles").html(html);
 		$("#articles>.item>.body>p>img").each(function (idx, item) {
 			var img = $(item);
@@ -39,7 +39,7 @@
 	self.loadGallery = function (authorId, page) {
 		$.ajax({ 
 			url: encodeURI(self.initCfg.apiRoot + "gallery/loadByUser?userId=" + authorId +
-				"&page=" + page),
+				"&pageSize=30&page=" + page),
 			xhrFields: {'Access-Control-Allow-Origin':'*'}, 
 			type: 'GET', dataType: 'json', data: { },
 			timeout: net.jadedungeon.ajaxTimeout,
@@ -47,9 +47,6 @@
 				if ('success' == data.status) {
 					self.renderGallery(data);
 					$('html,body').animate({scrollTop:0},700);
-					//初始化首页的页面图片
-					var lazyLoadImages = lazyload();
-					lazyLoadImages();
 				} else {
 					console.error("加载相册失败");
 				}

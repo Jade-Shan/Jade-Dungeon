@@ -149,11 +149,20 @@ function lazyload() {
 		}
 	}
 };
-var lazyLoadImages = lazyload();
-// 初始化首页的页面图片
-lazyLoadImages();
-// window.addEventListener('scroll', loadImages, false); //会被高频触发，这非常影响浏览器的性能
-window.addEventListener('scroll', throttle(lazyLoadImages, 500, 1000), false); //设置500ms 的延迟，和 1000ms 的间隔　避免高频防抖
+
+
+async function laterTask() {
+        await new Promise(r => setTimeout(r, 2000));
+        var lazyLoadImages = lazyload();
+        // 初始化首页的页面图片
+        lazyLoadImages();
+        // window.addEventListener('scroll', loadImages, false); //会被高频触发，这非常影响浏览器的性能
+	//设置500ms 的延迟，和 1000ms 的间隔　避免高频防抖
+        window.addEventListener('scroll', throttle(lazyLoadImages, 500, 1000), false);
+}
+laterTask();
+
+
 
 </script>
 </html>
