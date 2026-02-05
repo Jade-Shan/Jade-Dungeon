@@ -39,7 +39,7 @@
 	self.loadGallery = function (authorId, page) {
 		$.ajax({ 
 			url: encodeURI(self.initCfg.apiRoot + "gallery/loadByUser?userId=" + authorId +
-				"&pageSize=30&page=" + page),
+				"&pageSize=10&page=" + page),
 			xhrFields: {'Access-Control-Allow-Origin':'*'}, 
 			type: 'GET', dataType: 'json', data: { },
 			timeout: net.jadedungeon.ajaxTimeout,
@@ -47,6 +47,7 @@
 				if ('success' == data.status) {
 					self.renderGallery(data);
 					$('html,body').animate({scrollTop:0},700);
+					laterTask();
 				} else {
 					console.error("加载相册失败");
 				}

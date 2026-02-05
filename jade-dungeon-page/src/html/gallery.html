@@ -133,7 +133,7 @@ function throttle(fn, delay, atleast) {
 };
 
 function lazyload() {
-	var images = document.querySelectorAll('div#articles.content>div.row img[data-src]');
+	var images = document.querySelectorAll('div#articles.content>div.row img[data-origin]');
 	var len = images.length;
 	var n = 0;      //存储图片加载到的位置，避免每次都从第一张图片开始遍历        
 	return function () {
@@ -141,8 +141,8 @@ function lazyload() {
 		var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 		for (var i = n; i < len; i++) {
 			if (images[i].offsetTop < seeHeight + scrollTop) {
-				if (images[i].getAttribute('src') !== images[i].getAttribute('data-src')) {
-					images[i].src = images[i].getAttribute('data-src');
+				if (images[i].getAttribute('src') !== images[i].getAttribute('data-origin')) {
+					images[i].src = images[i].getAttribute('data-origin');
 				}
 				n = n + 1;
 			}
@@ -160,7 +160,7 @@ async function laterTask() {
 	//设置500ms 的延迟，和 1000ms 的间隔　避免高频防抖
         window.addEventListener('scroll', throttle(lazyLoadImages, 500, 1000), false);
 }
-laterTask();
+// laterTask();
 
 
 
