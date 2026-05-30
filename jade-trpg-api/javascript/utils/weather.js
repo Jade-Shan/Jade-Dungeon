@@ -57,20 +57,18 @@ exports.handler = {
 			// context.response.end(JSON.stringify(result));
 			await context.response.end(result.fontStr);
 		} else {
-			if (res.statusCode != 200) {
-				console.error(`miss app key `);
-				if (!context.response.headersSent) {
-					await context.response.writeHead(404, {
-						'Content-Type': 'application/json',
-						'Cache-Control': 'public,s-maxage=300,max-age=300',
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Methods': 'GET,POST',
-						'Access-Control-Allow-Headers': 'x-requested-with,content-type'
-					});
-				}
-				result.msg = 'miss appKey1'
-				await context.response.end(JSON.stringify(result));
+			console.error(`miss app key`);
+			if (!context.response.headersSent) {
+				await context.response.writeHead(400, {
+					'Content-Type': 'application/json;charset=utf-8',
+					'Cache-Control': 'public,s-maxage=300,max-age=300',
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Methods': 'GET,POST',
+					'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+				});
 			}
+			result.msg = 'miss appKey1 or appKey2';
+			await context.response.end(JSON.stringify(result));
 		}
 	}
 };

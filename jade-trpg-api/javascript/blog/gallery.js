@@ -95,7 +95,7 @@ exports.handler = {
                 } catch (error) { console.log(err); }
             }
             if (ablum && ablum.length > 0) {
-                article = { "time": time, "auth": auth, "title": title, "text": text, "ablum": ablum };
+                let article = { "time": time, "auth": auth, "title": title, "text": text, "ablum": ablum };
                 console.log(article);
                 let res = await rdsUtil.connectV4('blog').call((conn) => {
                     return conn.lPush(genGalleryKey(auth), JSON.stringify(article));

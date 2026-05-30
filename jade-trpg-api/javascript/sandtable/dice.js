@@ -74,7 +74,7 @@ exports.handler = {
                         return conn.hSet(genRollResultKey(campaignId, placeId, sceneId), 
 							username, JSON.stringify(rollRes));
                     });
-                    if (!res.isSuccess) { result.msg = res.err; } else {
+                    if (!res.isSuccess) { json.msg = res.err; } else {
                         json.status = 'success';
                         json.threshold = threshold;
                         json.msg = rollRes.msg;
@@ -112,7 +112,7 @@ exports.handler = {
                 return conn.hSet(genRollResultKey(campaignId, placeId, sceneId), username,
                     `{"threshold":${threshold}, "sum":0, "msg":""}`);
             });
-            if (!res.isSuccess) { result.msg = res.err; } else {
+            if (!res.isSuccess) { json.msg = res.err; } else {
                 json.status = 'success';
                 json.data = res.data;
             }

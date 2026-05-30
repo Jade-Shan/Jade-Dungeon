@@ -40,22 +40,45 @@ let createEmptyRecs = () => {
 let cityMap = new Map();
 
 let queryCityCord = async (appKey, cityName) => {
-    let result = { status: "err", msg: "unknow err" };
-    let pms = new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         const buffers = [];
-        let body = null;
+        let settled = false;
+        const done = (err, data) => {
+            if (settled) return;
+            settled = true;
+            if (err) { reject(err); } else { resolve(data); }
+        };
+
         let request = http.get(
             `http://api.openweathermap.org/geo/1.0/direct?appid=${appKey}&q=${cityName}&limit=5`,
             (res) => {
-                if (res.statusCode != 200) { reject(`Server HTTP Err Code: ${res.statusCode}`); }
+                if (res.statusCode !== 200) {
+                    res.resume();
+                    return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
+                }
                 res.on('data', (chunk) => { buffers.push(chunk); });
-                res.on('close', () => {
+                res.on('end', () => {
                     let str = Buffer.concat(buffers).toString('utf8');
-                    try { resolve(JSON.parse(str)); } catch (e) { reject(`parse json err: ${str}`); }
+                    try {
+                        done(null, JSON.parse(str));
+                    } catch (e) {
+                        done(new Error(`parse json err: ${str}`));
+                    }
+                });
+                res.on('error', (err) => {
+                    done(new Error(`Response stream error: ${err.message}`));
                 });
             });
-    });
-    await pms.then((data) => {
+
+        request.on('error', (err) => {
+            done(new Error(`Request error: ${err.message}`));
+        });
+
+        request.setTimeout(15000, () => {
+            request.destroy();
+            done(new Error('Request timeout'));
+        });
+    }).then((data) => {
         let tmpMap = new Map();
         for (let rec of data) {
             if (!tmpMap.has(`${rec.country}-${rec.name}`)) {
@@ -64,42 +87,62 @@ let queryCityCord = async (appKey, cityName) => {
             }
         }
         for (let k of tmpMap) { cityMap.set(k[0], k[1]); }
-        // console.log(cityMap);
     }).catch((e) => { console.log(e); });
 };
 
-
 let fetchForecastData = async (appKey, lat, lon) => {
     let result = { status: "err", msg: "unknow err" };
-    let pms = new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         const buffers = [];
-        let body = null;
+        let settled = false;
+        const done = (err, data) => {
+            if (settled) return;
+            settled = true;
+            if (err) { reject(err); } else { resolve(data); }
+        };
+
         let request = https.get(
             `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&mode=json&appid=${appKey}`,
             (res) => {
-                if (res.statusCode != 200) { reject(`Server HTTP Err Code: ${res.statusCode}`); }
+                if (res.statusCode !== 200) {
+                    res.resume();
+                    return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
+                }
                 res.on('data', (chunk) => { buffers.push(chunk); });
-                res.on('close', () => {
+                res.on('end', () => {
                     let str = Buffer.concat(buffers).toString('utf8');
                     try {
                         let json = JSON.parse(str);
                         if ('200' == json.cod) {
-                            resolve(json); 
+                            done(null, json);
                         } else {
-                            reject(str);
+                            done(new Error(str));
                         }
-                    } catch (e) { reject(`parse json err: ${str}`); }
+                    } catch (e) {
+                        done(new Error(`parse json err: ${str}`));
+                    }
+                });
+                res.on('error', (err) => {
+                    done(new Error(`Response stream error: ${err.message}`));
                 });
             });
-    });
-    await pms.then((data) => {
+
+        request.on('error', (err) => {
+            done(new Error(`Request error: ${err.message}`));
+        });
+
+        request.setTimeout(15000, () => {
+            request.destroy();
+            done(new Error('Request timeout'));
+        });
+    }).then((data) => {
         result = { status: 'success', msg: '', oriData: data };
-        // console.log(result);
     }).catch((e) => {
-        result.msg = e;
+        result.msg = e.message || e;
     });
     return result;
 };
+
 
 weatherCode3rdMap.set('01', { "code": 0b0000000000000000, "cn": "晴天", "ens": "Clear", "en": "Clear" });
 weatherCode3rdMap.set('50', { "code": 0b0000000000000010, "cn": "雾", "ens": "Fog", "en": "Fog" });

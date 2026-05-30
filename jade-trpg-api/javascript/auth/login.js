@@ -11,7 +11,7 @@ let genLoginToken = (username) => {
 let parseLoginToken = (str) => {
 	let result = {};
 	if (str && str.length > 38) {
-		let strArr = token.split('|');
+		let strArr = str.split('|');
 		if (strArr.length == 3 && strArr[0].length > 0 && // 
 			 strArr[1].length == 36 && strArr[2].length > 0) //
 		{

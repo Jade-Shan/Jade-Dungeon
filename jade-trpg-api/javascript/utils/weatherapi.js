@@ -51,27 +51,49 @@ exports.fetchForecast = async (appKey, cityName, days) => {
 
 let fetchForecastData = async (appKey, cityName, days) => {
     let result = { status: "err", msg: "unknow err" };
-    let pms = new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         const buffers = [];
-        let body = null;
-        let request = https.get(`https://api.weatherapi.com/v1/forecast.json?key=${appKey}&q=${cityName}&days=${days}&aqi=no&alerts=no`,
+        let settled = false;
+        const done = (err, data) => {
+            if (settled) return;
+            settled = true;
+            if (err) { reject(err); } else { resolve(data); }
+        };
+
+        let request = https.get(
+            `https://api.weatherapi.com/v1/forecast.json?key=${appKey}&q=${cityName}&days=${days}&aqi=no&alerts=no`,
             (res) => {
-                if (res.statusCode != 200) {
-                    reject(`Server HTTP Err Code: ${res.statusCode}`);
+                if (res.statusCode !== 200) {
+                    // 消费响应体以防内存泄漏，然后 reject
+                    res.resume();
+                    return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
                 }
                 res.on('data', (chunk) => { buffers.push(chunk); });
-                res.on('close', () => {
+                res.on('end', () => {
                     let str = Buffer.concat(buffers).toString('utf8');
                     try {
-                        resolve(JSON.parse(str));
-                    } catch (e) { reject(`parse json err: ${str}`); }
+                        done(null, JSON.parse(str));
+                    } catch (e) {
+                        done(new Error(`parse json err: ${str}`));
+                    }
+                });
+                res.on('error', (err) => {
+                    done(new Error(`Response stream error: ${err.message}`));
                 });
             });
-    });
-    await pms.then((data) => {
+
+        request.on('error', (err) => {
+            done(new Error(`Request error: ${err.message}`));
+        });
+
+        request.setTimeout(15000, () => {
+            request.destroy();
+            done(new Error('Request timeout'));
+        });
+    }).then((data) => {
         result = { status: 'success', msg: '', oriData: data };
     }).catch((e) => {
-        result.msg = e;
+        result.msg = e.message || e;
     });
     return result;
 };
