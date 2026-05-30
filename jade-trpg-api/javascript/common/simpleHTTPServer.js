@@ -10,6 +10,8 @@ var multer  = require('multer');
 var HTTP_GET  = 1;
 var HTTP_POST = 2;
 
+let MULTER_MAX_SIZE = 1 * 1024 * 1024;
+
 exports.HTTP_GET  = HTTP_GET ;
 exports.HTTP_POST = HTTP_POST;
 
@@ -20,7 +22,7 @@ exports.init = (globalCfg, application, handlers) => {
 	application.use(express.urlencoded({extended: false}));
 	/* 上传文件 */
 	if (globalCfg.path && globalCfg.path.uploadTmpFile) {
-		application.use(multer({dest: globalCfg.path.uploadTmpFile}).array('uploadFiles'));
+		application.use(multer({dest: globalCfg.path.uploadTmpFile, limits:{fieldSize: MULTER_MAX_SIZE}}).array('uploadFiles'));
 	}
 	/* 绑定静态文件目录位置 */
 	if (globalCfg.path && globalCfg.path.staticFile && 

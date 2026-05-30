@@ -1,6 +1,7 @@
 let httpServer = require('../common/simpleHTTPServer');
 let rdsUtil = require('../common/redisUtil');
 const https = require('https');
+const http  = require('http');
 
 
 let genSceneKey = (campaignId, placeId, sceneId) => {
@@ -93,14 +94,13 @@ exports.handler = {
 
 	"/api/sandtable/parseImage": async (context, data) => {
 		let json = { status: "error", msg: "unknow err" };
-		let src = data.params.src;
-		console.log(src);
+		let imgUrl = data.params.src;
+		console.log(imgUrl);
 
 		const buffers = [];
 		let contenttype = '';
 		let body = null;
 
-		//
 		let handle = (res) => {
 			res.on('data', (chunk) => { buffers.push(chunk); });
 			res.on('close', () => {
@@ -143,12 +143,13 @@ exports.handler = {
 				}
 			});
 		};
-		//
+
+		// 
 		let getImgResp = new Promise((resolve, reject) => {
 			if (/https/.test(imgUrl)) {
-				https.get(imgUrl,
-					// add agent for skip 'certificate has expired' error
-					{agent: new https.Agent({ rejectUnauthorized: false, keepAlive: true })},
+				https.get(imgUrl, 
+					// add agent for skip 'certificate has expired' error 
+					{agent: new https.Agent({ rejectUnauthorized: false, keepAlive: true })}, 
 					handle);
 			} else if (/http/.test(imgUrl)) {
 				http.get(imgUrl, handle);
