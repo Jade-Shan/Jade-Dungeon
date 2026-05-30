@@ -1,7 +1,7 @@
-let httpServer = require('../common/simpleHTTPServer');
+// let httpServer = require('../common/simpleHTTPServer');
 let rdsUtil = require('../common/redisUtil');
 const https = require('https');
-const http  = require('http');
+const http = require('http');
 
 
 let genSceneKey = (campaignId, placeId, sceneId) => {
@@ -18,11 +18,11 @@ let genMoveReqKey = (campaignId, placeId, sceneId) => {
 
 exports.handler = {
 	"/api/sandtable/load-move-request": async (context, data) => {
-		let json = {status:"error", msg: ""};
+		let json = { status: "error", msg: "" };
 		let campaignId = data.params.campaignId;
-		let placeId    = data.params.placeId   ;
-		let sceneId    = data.params.sceneId   ;
-		if (campaignId && placeId && sceneId && campaignId.length > 0 && 
+		let placeId = data.params.placeId;
+		let sceneId = data.params.sceneId;
+		if (campaignId && placeId && sceneId && campaignId.length > 0 &&
 			placeId.length > 0 && sceneId.length > 0) //
 		{
 			let res = await rdsUtil.connectV4('trpg').call((conn) => {
@@ -37,8 +37,8 @@ exports.handler = {
 						for (let key in res.data) {
 							try {
 								// json.data[key] = JSON.parse(res.data[key]);
-								json.data.push({"userId": key, "pos": JSON.parse(res.data[key])});
-							} catch(e) {/* do nothing */}
+								json.data.push({ "userId": key, "pos": JSON.parse(res.data[key]) });
+							} catch (e) {/* do nothing */ }
 						}
 						// json.data = null == res.data ? {} : JSON.parse(res.data);
 					} catch (e) { /* */ }
@@ -47,25 +47,26 @@ exports.handler = {
 			}
 		} else { json.msg = "miss params"; }
 		context.response.writeHead(200, {
-			'Content-Type':'application/json;charset=utf-8',
-			'Access-Control-Allow-Origin':'*',
-			'Access-Control-Allow-Methods':'GET,POST',
-			'Access-Control-Allow-Headers':'x-requested-with,content-type'});
+			'Content-Type': 'application/json;charset=utf-8',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET,POST',
+			'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+		});
 		context.response.end(JSON.stringify(json));
 	},
 
 	"/api/sandtable/request-move": async (context, data) => {
-		let result = {status:'err'};
+		let result = { status: 'err' };
 		let campaignId = data.params.campaignId;
-		let placeId    = data.params.placeId ;
-		let sceneId    = data.params.sceneId ;
-		let username   = data.params.username;
-		let x          = data.params.x       ;
-		let y          = data.params.y       ;
-		if (campaignId && placeId && sceneId && username && campaignId.length > 0 && 
+		let placeId = data.params.placeId;
+		let sceneId = data.params.sceneId;
+		let username = data.params.username;
+		let x = data.params.x;
+		let y = data.params.y;
+		if (campaignId && placeId && sceneId && username && campaignId.length > 0 &&
 			placeId.length > 0 && sceneId.length > 0 && username.length > 0) //
 		{
-			if (x && y && x > -1 && y >-1) {
+			if (x && y && x > -1 && y > -1) {
 				let res = await rdsUtil.connectV4('trpg').call((conn) => {
 					return conn.hSet(genMoveReqKey(campaignId, placeId, sceneId), username, `{"x":${x},"y":${y}}`);
 				});
@@ -82,13 +83,14 @@ exports.handler = {
 					result.status = 'success';
 				}
 			}
-		} else {result.msg = 'miss params';}
+		} else { result.msg = 'miss params'; }
 
 		context.response.writeHead(200, {
-			'Content-Type':'application/json;charset=utf-8',
-			'Access-Control-Allow-Origin':'*',
-			'Access-Control-Allow-Methods':'GET,POST',
-			'Access-Control-Allow-Headers':'x-requested-with,content-type'});
+			'Content-Type': 'application/json;charset=utf-8',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET,POST',
+			'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+		});
 		context.response.end(JSON.stringify(result));
 	},
 
@@ -97,78 +99,102 @@ exports.handler = {
 		let imgUrl = data.params.src;
 		console.log(imgUrl);
 
-		const buffers = [];
-		let contenttype = '';
-		let body = null;
-
-		let handle = (res) => {
-			res.on('data', (chunk) => { buffers.push(chunk); });
-			res.on('close', () => {
-				contenttype = res.headers['content-type'];
-				try {
-					body = Buffer.concat(buffers);
-				} catch (e) {
-					body = '\n    ' + e;
-				}
-				if (res.statusCode !== 200) {
-					console.error(`Did not get an OK from the server. Code: ${res.statusCode}`);
-					context.response.writeHead(500, {
-						'Content-Type': contenttype,
-						'Cache-Control': 'public,s-maxage=300,max-age=300',
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Methods': 'GET,POST',
-						'Access-Control-Allow-Headers': 'x-requested-with,content-type'
-					});
-					let errBody = 'Err on get : ' + imgUrl;
-					errBody = errBody + '\n   call src err-code: ' + res.statusCode;
+		// 用 Promise 封装整个图片请求+响应周期，确保 handler 不提前返回
+		await new Promise((resolve, reject) => {
+			let handle = (res) => {
+				const buffers = [];
+				res.on('data', (chunk) => { buffers.push(chunk); });
+				res.on('end', () => {
+					let body;
 					try {
-						errBody = errBody + '\n    ' + body;
+						body = Buffer.concat(buffers);
 					} catch (e) {
-						errBody = errBody + '\n    ' + e;
+						body = Buffer.from(`\n    ${e}`);
 					}
-					context.response.end(errBody);
-					return;
-				} else {
-					// console.log('Retrieved all data');
-					// 'Cache-Control': 'public,s-maxage=36000,max-age=36000',
-					context.response.writeHead(200, {
-						'Content-Type': contenttype,
-						'Cache-Control': 'private,maxage=36000',
+					if (res.statusCode !== 200) {
+						console.error(`Did not get an OK from the server. Code: ${res.statusCode}`);
+						context.response.writeHead(500, {
+							'Content-Type': res.headers['content-type'] || 'text/plain',
+							'Cache-Control': 'public,s-maxage=300,max-age=300',
+							'Access-Control-Allow-Origin': '*',
+							'Access-Control-Allow-Methods': 'GET,POST',
+							'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+						});
+						let errBody = 'Err on get : ' + imgUrl;
+						errBody = errBody + '\n   call src err-code: ' + res.statusCode;
+						try {
+							errBody = errBody + '\n    ' + body.toString();
+						} catch (e) {
+							errBody = errBody + '\n    ' + e;
+						}
+						context.response.end(errBody);
+					} else {
+						context.response.writeHead(200, {
+							'Content-Type': res.headers['content-type'] || 'application/octet-stream',
+							'Cache-Control': 'private,maxage=36000',
+							'Access-Control-Allow-Origin': '*',
+							'Access-Control-Allow-Methods': 'GET,POST',
+							'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+						});
+						context.response.end(body);
+					}
+					resolve();
+				});
+				res.on('error', (err) => {
+					console.error(`Response stream error for ${imgUrl}:`, err);
+					if (!context.response.headersSent) {
+						context.response.writeHead(502, {
+							'Content-Type': 'application/json;charset=utf-8',
+							'Access-Control-Allow-Origin': '*',
+							'Access-Control-Allow-Methods': 'GET,POST',
+							'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+						});
+						context.response.end(JSON.stringify({ status: "error", msg: "image fetch failed", data: imgUrl }));
+					}
+					resolve();
+				});
+			};
+
+			let request;
+			if (/^https:\/\//i.test(imgUrl)) {
+				request = https.get(imgUrl,
+					{ agent: new https.Agent({ rejectUnauthorized: false, keepAlive: true }) },
+					handle);
+			} else {
+				request = http.get(imgUrl, handle);
+			}
+			request.on('error', (err) => {
+				console.error(`Request error for ${imgUrl}:`, err);
+				if (!context.response.headersSent) {
+					context.response.writeHead(502, {
+						'Content-Type': 'application/json;charset=utf-8',
 						'Access-Control-Allow-Origin': '*',
 						'Access-Control-Allow-Methods': 'GET,POST',
 						'Access-Control-Allow-Headers': 'x-requested-with,content-type'
 					});
-					context.response.end(body);
-					return;
+					context.response.end(JSON.stringify({ status: "error", msg: "image request failed", data: imgUrl }));
 				}
+				resolve();
 			});
-		};
-
-		// 
-		let getImgResp = new Promise((resolve, reject) => {
-			if (/https/.test(imgUrl)) {
-				https.get(imgUrl, 
-					// add agent for skip 'certificate has expired' error 
-					{agent: new https.Agent({ rejectUnauthorized: false, keepAlive: true })}, 
-					handle);
-			} else if (/http/.test(imgUrl)) {
-				http.get(imgUrl, handle);
-			} else {
-				context.response.writeHead(200, {
-					'Content-Type':'application/json;charset=utf-8',
-					'Access-Control-Allow-Origin':'*',
-					'Access-Control-Allow-Methods':'GET,POST',
-					'Access-Control-Allow-Headers':'x-requested-with,content-type'});
-				context.response.end(JSON.stringify({status:"error", msg: "unknow err", data: imgUrl}));
-			}
+			request.setTimeout(15000, () => {
+				request.destroy();
+				if (!context.response.headersSent) {
+					context.response.writeHead(504, {
+						'Content-Type': 'application/json;charset=utf-8',
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Methods': 'GET,POST',
+						'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+					});
+					context.response.end(JSON.stringify({ status: "error", msg: "image request timeout", data: imgUrl }));
+				}
+				resolve();
+			});
 		});
-		//
-		await getImgResp.then(()=>{});
 	},
 
 	// localhost:8088/api/sandtable/map-owner?campaignId=campaign01 
 	"/api/sandtable/map-owner": async (context, data) => {
-		let json = {status:"error", msg: "unknow err"};
+		let json = { status: "error", msg: "unknow err" };
 		let res = await rdsUtil.connectV4('trpg').call((conn) => {
 			return conn.get(genOwnerKey(data.params.campaignId));
 		});
@@ -178,16 +204,17 @@ exports.handler = {
 			json.status = 'success';
 		}
 		context.response.writeHead(200, {
-			'Content-Type':'application/json;charset=utf-8',
-			'Access-Control-Allow-Origin':'*',
-			'Access-Control-Allow-Methods':'GET,POST',
-			'Access-Control-Allow-Headers':'x-requested-with,content-type'});
+			'Content-Type': 'application/json;charset=utf-8',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET,POST',
+			'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+		});
 		context.response.end(JSON.stringify(json));
 	},
 
 	//http://localhost:8088/api/sandtable/load-map?campaignId=campaign01&placeId=place01&sceneId=scene01
 	"/api/sandtable/load-map": async (context, data) => {
-		let json = {status:"error", msg: ""};
+		let json = { status: "error", msg: "" };
 		let res = await rdsUtil.connectV4('trpg').call((conn) => {
 			return conn.get(genSceneKey(data.params.campaignId, data.params.placeId, data.params.sceneId));
 		});
@@ -198,16 +225,17 @@ exports.handler = {
 			json = { status: "error", msg: "empty" };
 		}
 		context.response.writeHead(200, {
-			'Content-Type':'application/json;charset=utf-8',
-			'Access-Control-Allow-Origin':'*',
-			'Access-Control-Allow-Methods':'GET,POST',
-			'Access-Control-Allow-Headers':'x-requested-with,content-type'});
+			'Content-Type': 'application/json;charset=utf-8',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET,POST',
+			'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+		});
 		context.response.end(JSON.stringify(json));
 	},
 
 	//http://localhost:8088/api/sandtable/save-map?campaignId=campaign01&placeId=place01&sceneId=scene01&jsonStr={} 
 	"/api/sandtable/save-map": async (context, data) => {
-		let result = {status:'err'};
+		let result = { status: 'err' };
 		let res = await rdsUtil.connectV4('trpg').call((conn) => {
 			return conn.get(genOwnerKey(data.params.campaignId));
 		});
@@ -235,10 +263,11 @@ exports.handler = {
 			result.msg = 'not owner';
 		}
 		context.response.writeHead(200, {
-			'Content-Type':'application/json;charset=utf-8',
-			'Access-Control-Allow-Origin':'*',
-			'Access-Control-Allow-Methods':'GET,POST',
-			'Access-Control-Allow-Headers':'x-requested-with,content-type'});
+			'Content-Type': 'application/json;charset=utf-8',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET,POST',
+			'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+		});
 		context.response.end(JSON.stringify(result));
 	}
 };
