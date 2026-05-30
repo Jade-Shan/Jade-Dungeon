@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 启动与运行
 
-- 使用 nvm 管理 Node 版本，项目根目录有 `.nvmrc`（当前指定 v16.20.2）。
-- 开发环境启动：`bash startup-dev.sh`（端口 8038）
-- 生产环境启动：`bash startup-rls.sh`（端口 8088）
+- 使用 nvm 管理 Node 版本，项目根目录有 `.nvmrc`（当前指定 v22.22.2）。
+- 开发环境启动：`bash startup-dev.sh`（端口 8038，假设 nvm 已在当前 shell 中可用）
+- 生产环境启动：`bash startup-rls.sh`（端口 8088，脚本内显式加载 nvm）
 - 直接启动：`node ./javascript/main.js -h localhost -p 8088`
 - 命令行参数：`-h/--host`（主机名）、`-p/--port`（端口）、`-u/--uploadPath`（上传文件暂存目录）
 
@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 启动流程
 
-`javascript/main.js` → 加载 `javascript/config.js`（全局配置）→ 加载 `javascript/common/simpleHTTPServer.js`（Express 封装）→ 按 `config.globalCfg.moduleNames` 列表逐个加载模块 → `httpServer.start()` 绑定路由并启动监听。
+`javascript/main.js`（CLI 参数通过 `arg` 库解析）→ 加载 `javascript/config.js`（全局配置）→ 加载 `javascript/common/simpleHTTPServer.js`（Express 封装）→ 按 `config.globalCfg.moduleNames` 列表逐个加载模块 → `httpServer.start()` 绑定路由并启动监听。
 
 ### 模块（Handler）机制
 
@@ -34,6 +34,31 @@ exports.handler = {
 
 `simpleHTTPServer.js` 自动将 handler 对象的 key 绑定到 Express 路由，并统一处理参数合并、文件上传、CORS 头和 JSON 响应头。
 
+### 响应写入模式
+
+Handler 函数**不通过返回值**来响应请求，而是直接操作 `context.response`：
+
+```javascript
+"/api/example": async (context, data) => {
+    let json = { status: "ok", msg: "" };
+    // ... 业务逻辑 ...
+    if (!context.response.headersSent) {
+        context.response.writeHead(200, {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,POST',
+            'Access-Control-Allow-Headers': 'x-requested-with,content-type'
+        });
+    }
+    context.response.end(JSON.stringify(json));
+};
+```
+
+- 框架在 handler 执行完毕后检查 `headersSent`，若未发送则自动补上默认的 CORS + JSON 头并调用 `end()`（见 `simpleHTTPServer.js` 中的 `HttpMethods` 绑定逻辑）。
+- 若 handler 需要自定义状态码或额外响应头（如 `Set-Cookie`），应在 `end()` 之前手动调用 `writeHead()`，框架检测到 `headersSent` 后就不会覆盖。
+- 也可以使用 `context.response.write()` 分段输出（如流式响应），但最终必须调用 `context.response.end()`。
+- 所有响应均以 JSON 格式返回。
+
 ### 目录结构
 
 | 目录 | 说明 |
@@ -44,7 +69,7 @@ exports.handler = {
 | `javascript/sandtable/` | TRPG 沙盘工具核心：`map.js`（地图场景存/取/移动请求）、`dice.js`（骰子检定） |
 | `javascript/utils/` | 天气预报服务（聚合 weatherapi + openweathermap） |
 | `static/` | 静态文件目录（通过 `/static` 路径暴露） |
-| `docs/` | 各模块的功能说明文档 |
+| `docs/` | 模块文档：`framework.md`（框架说明）、`blog.md`、`gallery.md`、`weather.md` |
 
 ### Redis 数据层
 
