@@ -58,7 +58,7 @@ exports.handler = {
 					for (let i = 0; i < res2.data.length; i++) {
 						json.articles.push(JSON.parse(res2.data[i]));
 					}
-				} catch (error) { console.log(err); }
+				} catch (error) { console.log(error); }
 			}
 			// console.log(res2);
 		}
@@ -92,7 +92,7 @@ exports.handler = {
 							"url": picUrls[i]
 						});
 					}
-				} catch (error) { console.log(err); }
+				} catch (error) { console.log(error); }
 			}
 			if (ablum && ablum.length > 0) {
 				let article = { "time": time, "auth": auth, "title": title, "text": text, "ablum": ablum };

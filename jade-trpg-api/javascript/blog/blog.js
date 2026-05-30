@@ -89,7 +89,7 @@ exports.handler = {
 					for (let i = 0; i < res2.data.length; i++) {
 						json.articles.push(JSON.parse(res2.data[i]));
 					}
-				} catch (error) { console.log(err); }
+				} catch (error) { console.log(error); }
 			}
 			// console.log(res2);
 		}
