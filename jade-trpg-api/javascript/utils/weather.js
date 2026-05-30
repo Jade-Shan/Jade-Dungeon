@@ -75,78 +75,78 @@ exports.handler = {
 
 
 let transMoonPhaseFont = (moonPhase) => {
-    let mmMoonIcon = 5;
-    if (moonPhase == 'New Moon'       ) { mmMoonIcon = 0; } else
-    if (moonPhase == 'Waxing Crescent') { mmMoonIcon = 1; } else
-    if (moonPhase == 'First Quarter'  ) { mmMoonIcon = 2; } else
-    if (moonPhase == 'Waxing Gibbous' ) { mmMoonIcon = 3; } else
-    if (moonPhase == 'Full Moon'      ) { mmMoonIcon = 4; } else
-    if (moonPhase == 'Waning Gibbous' ) { mmMoonIcon = 5; } else
-    if (moonPhase == 'Last Quarter'   ) { mmMoonIcon = 6; } else
-    if (moonPhase == 'Waning Crescent') { mmMoonIcon = 7; }
-    return mmMoonIcon;
+	let mmMoonIcon = 5;
+	if (moonPhase == 'New Moon'       ) { mmMoonIcon = 0; } else
+	if (moonPhase == 'Waxing Crescent') { mmMoonIcon = 1; } else
+	if (moonPhase == 'First Quarter'  ) { mmMoonIcon = 2; } else
+	if (moonPhase == 'Waxing Gibbous' ) { mmMoonIcon = 3; } else
+	if (moonPhase == 'Full Moon'      ) { mmMoonIcon = 4; } else
+	if (moonPhase == 'Waning Gibbous' ) { mmMoonIcon = 5; } else
+	if (moonPhase == 'Last Quarter'   ) { mmMoonIcon = 6; } else
+	if (moonPhase == 'Waning Crescent') { mmMoonIcon = 7; }
+	return mmMoonIcon;
 };
 
 let splitWeatherDesc = (str) => {
-    let result = ['',''];
-    if (str && str.length > 0) {
-        if (str.length > 30) { str.substring(0, 30); }
-        if (str.length < 16) {
-            result[0] = str;
-        } else {
-            let arr = str.split(' ');
-            for (let s of arr) {
-                if (result[0].length + s.length + 1 < 16) {
-                    if (result[0].length > 0) { result[0] = result[0] + ' '; }
-                    result[0] = result[0] + s;
-                } else {
-                    if (result[1].length > 0) { result[1] = result[1] + ' '; }
-                    result[1] = result[1] + s;
-                }
-            }
-        }
-    }
-    return result;
+	let result = ['',''];
+	if (str && str.length > 0) {
+		if (str.length > 30) { str.substring(0, 30); }
+		if (str.length < 16) {
+			result[0] = str;
+		} else {
+			let arr = str.split(' ');
+			for (let s of arr) {
+				if (result[0].length + s.length + 1 < 16) {
+					if (result[0].length > 0) { result[0] = result[0] + ' '; }
+					result[0] = result[0] + s;
+				} else {
+					if (result[1].length > 0) { result[1] = result[1] + ' '; }
+					result[1] = result[1] + s;
+				}
+			}
+		}
+	}
+	return result;
 };
 
 forecastDays = [{
-    location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-    temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-    windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+	temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+	windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
 }, {
-    location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-    temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-    windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+	temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+	windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
 }, {
-    location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-    temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-    windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+	temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+	windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
 }, {
-    location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-    temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-    windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+	temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+	windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
 }, {
-    location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-    temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-    windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+	temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+	windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
 }];
 
 let getWeatherIconChar = (code, isDay) => {
-    let weather = weatherCodeMap.get(code);
-    if (weather && weather.iconChar && weather.iconChar.day) {
-        // 
-    } else {
-        weather = weatherCodeMap.get(0b100);
-        for (let i = 1; i < 16; i++) {
-            let p = 2 ** i;
-            // console.log(`2 ** ${i} = ${p}`);
-            if ((code | 2 ** i) > 0) {
-                weather = weatherCodeMap.get(p);
-            }
-        }
-    }
-    // console.log(`${code.toString(2).padStart(16, 0)} : ${weather.iconChar.day}`);
-    return isDay ? weather.iconChar.day : weather.iconChar.night;
+	let weather = weatherCodeMap.get(code);
+	if (weather && weather.iconChar && weather.iconChar.day) {
+		// 
+	} else {
+		weather = weatherCodeMap.get(0b100);
+		for (let i = 1; i < 16; i++) {
+			let p = 2 ** i;
+			// console.log(`2 ** ${i} = ${p}`);
+			if ((code | 2 ** i) > 0) {
+				weather = weatherCodeMap.get(p);
+			}
+		}
+	}
+	// console.log(`${code.toString(2).padStart(16, 0)} : ${weather.iconChar.day}`);
+	return isDay ? weather.iconChar.day : weather.iconChar.night;
 };
 
 let transTime12to24 = (timeStr) => {
@@ -154,59 +154,59 @@ let transTime12to24 = (timeStr) => {
  let min  = parseInt("1" + timeStr.substring(3, 5)) - 100;
  let part = timeStr.substring(6, 8);
  if (part == 'pm' || part == 'PM') {
-     hour = hour + 12;
+	 hour = hour + 12;
  }
  return {hour: hour, min: min};
 };
 
 let checkIsDay = (sunrise, sunset) => {
-    let now = new Date();
-    let hour = now.getHours();
-    let min = now.getMinutes();
-    if (hour < sunrise.hour || hour > sunset.hour || //
-        (hour == sunrise.hour && min < sunrise.min) || //
-        (hour == sunset.hour && min > sunset.min)) // 
-    {
-        return false;
-    } else {
-        return true;
-    }
+	let now = new Date();
+	let hour = now.getHours();
+	let min = now.getMinutes();
+	if (hour < sunrise.hour || hour > sunset.hour || //
+		(hour == sunrise.hour && min < sunrise.min) || //
+		(hour == sunset.hour && min > sunset.min)) // 
+	{
+		return false;
+	} else {
+		return true;
+	}
 };
 
 let transForecastFormatFontText = (forecastDays) => {
-    // console.log(forecastDays);
-    // console.log(forecastDays[0].weatherDesc);
-    let weatherStrArr = splitWeatherDesc(forecastDays[0].weatherDesc);
-    let sunrise = transTime12to24(forecastDays[0].sunrise);
-    let sunset  = transTime12to24(forecastDays[0].sunset );
-    let isDay   = checkIsDay(sunrise, sunset);
-    let fontStr = '';
-    fontStr = fontStr + `${forecastDays[0].location}\n`;
-    fontStr = fontStr + `${getWeatherIconChar(forecastDays[0].weatherCode, isDay)}\n`;
-    fontStr = fontStr + `${transMoonPhaseFont(forecastDays[0].moonPhase)}\n`;
-    fontStr = fontStr + `${forecastDays[0].temp}\n`;
-    fontStr = fontStr + `${forecastDays[0].tempBodyFeel}\n`;
-    fontStr = fontStr + `${forecastDays[0].tempMin}~${forecastDays[0].tempMax}\n`;
-    fontStr = fontStr + `${forecastDays[0].atmPressure}\n`;
-    fontStr = fontStr + `${forecastDays[0].windSpeed}\n`;
-    fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[0].windDir).iconChar}\n`;
-    fontStr = fontStr + `${weatherStrArr[0]}\n`;
-    fontStr = fontStr + `${weatherStrArr[1]}\n`;
-    fontStr = fontStr + `${forecastDays[0].humedPct}%\n`;
-    fontStr = fontStr + `${forecastDays[0].preciPct}%\n`;
-    fontStr = fontStr + `${`${sunrise.hour}`.padStart(2, '0')}:${`${sunrise.min}`.padStart(2, '0')} ~ ${`${sunset.hour}`.padStart(2, '0')}:${`${sunset.min}`.padStart(2, '0')}\n`;
-    fontStr = fontStr + `${forecastDays[1].dayOfWeek.padStart(8, ' ')}  ${forecastDays[2].dayOfWeek.padStart(8, ' ')}  ${forecastDays[3].dayOfWeek.padStart(8, ' ')}  ${forecastDays[4].dayOfWeek.padStart(8, ' ')}\n`;
-    fontStr = fontStr + `  ${getWeatherIconChar(forecastDays[1].weatherCode, true)}  ${getWeatherIconChar(forecastDays[2].weatherCode, true)}  ${getWeatherIconChar(forecastDays[3].weatherCode, true)}   ${getWeatherIconChar(forecastDays[4].weatherCode, true)}\n`;
-    fontStr = fontStr + `${`${forecastDays[1].preciPct}%`   .padStart(10, ' ')}${`${forecastDays[2].preciPct}%`   .padStart(10, ' ')}${`${forecastDays[3].preciPct}%`   .padStart(10, ' ')}${`${forecastDays[4].preciPct}%`   .padStart(10, ' ')}\n`;
-    fontStr = fontStr + `${`${forecastDays[1].windSpeed}Kph`.padStart(10, ' ')}${`${forecastDays[2].windSpeed}Kph`.padStart(10, ' ')}${`${forecastDays[3].windSpeed}Kph`.padStart(10, ' ')}${`${forecastDays[4].windSpeed}Kph`.padStart(10, ' ')}\n`;
-    fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[1].windDir).iconChar}\n`;
-    fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[2].windDir).iconChar}\n`;
-    fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[3].windDir).iconChar}\n`;
-    fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[4].windDir).iconChar}\n`;
-    fontStr = fontStr + `${`${forecastDays[1].tempMax}C`.padStart(10, ' ')}${`${forecastDays[2].tempMax}C`.padStart(10, ' ')}${`${forecastDays[3].tempMax}C`.padStart(10, ' ')}${`${forecastDays[4].tempMax}C`.padStart(10, ' ')}\n`;
-    fontStr = fontStr + `${`${forecastDays[1].tempMin}C`.padStart(10, ' ')}${`${forecastDays[2].tempMin}C`.padStart(10, ' ')}${`${forecastDays[3].tempMin}C`.padStart(10, ' ')}${`${forecastDays[4].tempMin}C`.padStart(10, ' ')}\n`;
-    // console.log(fontStr);
-    return fontStr;
+	// console.log(forecastDays);
+	// console.log(forecastDays[0].weatherDesc);
+	let weatherStrArr = splitWeatherDesc(forecastDays[0].weatherDesc);
+	let sunrise = transTime12to24(forecastDays[0].sunrise);
+	let sunset  = transTime12to24(forecastDays[0].sunset );
+	let isDay   = checkIsDay(sunrise, sunset);
+	let fontStr = '';
+	fontStr = fontStr + `${forecastDays[0].location}\n`;
+	fontStr = fontStr + `${getWeatherIconChar(forecastDays[0].weatherCode, isDay)}\n`;
+	fontStr = fontStr + `${transMoonPhaseFont(forecastDays[0].moonPhase)}\n`;
+	fontStr = fontStr + `${forecastDays[0].temp}\n`;
+	fontStr = fontStr + `${forecastDays[0].tempBodyFeel}\n`;
+	fontStr = fontStr + `${forecastDays[0].tempMin}~${forecastDays[0].tempMax}\n`;
+	fontStr = fontStr + `${forecastDays[0].atmPressure}\n`;
+	fontStr = fontStr + `${forecastDays[0].windSpeed}\n`;
+	fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[0].windDir).iconChar}\n`;
+	fontStr = fontStr + `${weatherStrArr[0]}\n`;
+	fontStr = fontStr + `${weatherStrArr[1]}\n`;
+	fontStr = fontStr + `${forecastDays[0].humedPct}%\n`;
+	fontStr = fontStr + `${forecastDays[0].preciPct}%\n`;
+	fontStr = fontStr + `${`${sunrise.hour}`.padStart(2, '0')}:${`${sunrise.min}`.padStart(2, '0')} ~ ${`${sunset.hour}`.padStart(2, '0')}:${`${sunset.min}`.padStart(2, '0')}\n`;
+	fontStr = fontStr + `${forecastDays[1].dayOfWeek.padStart(8, ' ')}  ${forecastDays[2].dayOfWeek.padStart(8, ' ')}  ${forecastDays[3].dayOfWeek.padStart(8, ' ')}  ${forecastDays[4].dayOfWeek.padStart(8, ' ')}\n`;
+	fontStr = fontStr + `  ${getWeatherIconChar(forecastDays[1].weatherCode, true)}  ${getWeatherIconChar(forecastDays[2].weatherCode, true)}  ${getWeatherIconChar(forecastDays[3].weatherCode, true)}   ${getWeatherIconChar(forecastDays[4].weatherCode, true)}\n`;
+	fontStr = fontStr + `${`${forecastDays[1].preciPct}%`   .padStart(10, ' ')}${`${forecastDays[2].preciPct}%`   .padStart(10, ' ')}${`${forecastDays[3].preciPct}%`   .padStart(10, ' ')}${`${forecastDays[4].preciPct}%`   .padStart(10, ' ')}\n`;
+	fontStr = fontStr + `${`${forecastDays[1].windSpeed}Kph`.padStart(10, ' ')}${`${forecastDays[2].windSpeed}Kph`.padStart(10, ' ')}${`${forecastDays[3].windSpeed}Kph`.padStart(10, ' ')}${`${forecastDays[4].windSpeed}Kph`.padStart(10, ' ')}\n`;
+	fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[1].windDir).iconChar}\n`;
+	fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[2].windDir).iconChar}\n`;
+	fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[3].windDir).iconChar}\n`;
+	fontStr = fontStr + `${windDirtCodeMap.get(forecastDays[4].windDir).iconChar}\n`;
+	fontStr = fontStr + `${`${forecastDays[1].tempMax}C`.padStart(10, ' ')}${`${forecastDays[2].tempMax}C`.padStart(10, ' ')}${`${forecastDays[3].tempMax}C`.padStart(10, ' ')}${`${forecastDays[4].tempMax}C`.padStart(10, ' ')}\n`;
+	fontStr = fontStr + `${`${forecastDays[1].tempMin}C`.padStart(10, ' ')}${`${forecastDays[2].tempMin}C`.padStart(10, ' ')}${`${forecastDays[3].tempMin}C`.padStart(10, ' ')}${`${forecastDays[4].tempMin}C`.padStart(10, ' ')}\n`;
+	// console.log(fontStr);
+	return fontStr;
 }
 
 windDirtCodeMap.set("N"  ,{"code":"N"  ,"iconChar":"a","name":"North"          ,"angle":  "0.00°"});

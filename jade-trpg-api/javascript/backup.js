@@ -16,20 +16,20 @@ let dirname = path.resolve(__dirname, backupPath)
 // 递归创建目录
 let mkdirRecursive = (dirname) => {
 	console.log(dirname);
-    // 判断是否存在当前 path 的最后一层目录
-    if (fs.existsSync(dirname)) 
-        // 存在，则不做操作，直接返回
-        return true
-    
-    // 若不存在，则判断当前 path 倒数第二层目录是否存在
-    // path.dirname 可以获取当前路径的上一层路径
-    // 例如： /dirName1/dirName2/dirName3
-    // path.dirname('/dirName1/dirName2/dirName3') // /dirName1/dirName2
-    if (mkdirRecursive(path.dirname(dirname))) {
-        // 若存在，则在当前目录，创建下一层目录
-        fs.mkdirSync(dirname)
-        return true
-    }
+	// 判断是否存在当前 path 的最后一层目录
+	if (fs.existsSync(dirname)) 
+		// 存在，则不做操作，直接返回
+		return true
+	
+	// 若不存在，则判断当前 path 倒数第二层目录是否存在
+	// path.dirname 可以获取当前路径的上一层路径
+	// 例如： /dirName1/dirName2/dirName3
+	// path.dirname('/dirName1/dirName2/dirName3') // /dirName1/dirName2
+	if (mkdirRecursive(path.dirname(dirname))) {
+		// 若存在，则在当前目录，创建下一层目录
+		fs.mkdirSync(dirname)
+		return true
+	}
 };
 
 let fetchData = (url, success) => {

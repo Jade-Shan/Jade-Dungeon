@@ -14,133 +14,133 @@ let lastCache = undefined;
 let weatherCode3rdMap = new Map();
 
 let createEmptyRecs = () => {
-    return [{
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }];
+	return [{
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}];
 }
 
 let cityMap = new Map();
 
 let queryCityCord = async (appKey, cityName) => {
-    await new Promise((resolve, reject) => {
-        const buffers = [];
-        let settled = false;
-        const done = (err, data) => {
-            if (settled) return;
-            settled = true;
-            if (err) { reject(err); } else { resolve(data); }
-        };
+	await new Promise((resolve, reject) => {
+		const buffers = [];
+		let settled = false;
+		const done = (err, data) => {
+			if (settled) return;
+			settled = true;
+			if (err) { reject(err); } else { resolve(data); }
+		};
 
-        let request = http.get(
-            `http://api.openweathermap.org/geo/1.0/direct?appid=${appKey}&q=${cityName}&limit=5`,
-            (res) => {
-                if (res.statusCode !== 200) {
-                    res.resume();
-                    return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
-                }
-                res.on('data', (chunk) => { buffers.push(chunk); });
-                res.on('end', () => {
-                    let str = Buffer.concat(buffers).toString('utf8');
-                    try {
-                        done(null, JSON.parse(str));
-                    } catch (e) {
-                        done(new Error(`parse json err: ${str}`));
-                    }
-                });
-                res.on('error', (err) => {
-                    done(new Error(`Response stream error: ${err.message}`));
-                });
-            });
+		let request = http.get(
+			`http://api.openweathermap.org/geo/1.0/direct?appid=${appKey}&q=${cityName}&limit=5`,
+			(res) => {
+				if (res.statusCode !== 200) {
+					res.resume();
+					return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
+				}
+				res.on('data', (chunk) => { buffers.push(chunk); });
+				res.on('end', () => {
+					let str = Buffer.concat(buffers).toString('utf8');
+					try {
+						done(null, JSON.parse(str));
+					} catch (e) {
+						done(new Error(`parse json err: ${str}`));
+					}
+				});
+				res.on('error', (err) => {
+					done(new Error(`Response stream error: ${err.message}`));
+				});
+			});
 
-        request.on('error', (err) => {
-            done(new Error(`Request error: ${err.message}`));
-        });
+		request.on('error', (err) => {
+			done(new Error(`Request error: ${err.message}`));
+		});
 
-        request.setTimeout(15000, () => {
-            request.destroy();
-            done(new Error('Request timeout'));
-        });
-    }).then((data) => {
-        let tmpMap = new Map();
-        for (let rec of data) {
-            if (!tmpMap.has(`${rec.country}-${rec.name}`)) {
-                tmpMap.set(`${rec.country}-${rec.name}`,
-                    { country: rec.country, city: rec.name, lat: rec.lat, lon: rec.lon });
-            }
-        }
-        for (let k of tmpMap) { cityMap.set(k[0], k[1]); }
-    }).catch((e) => { console.log(e); });
+		request.setTimeout(15000, () => {
+			request.destroy();
+			done(new Error('Request timeout'));
+		});
+	}).then((data) => {
+		let tmpMap = new Map();
+		for (let rec of data) {
+			if (!tmpMap.has(`${rec.country}-${rec.name}`)) {
+				tmpMap.set(`${rec.country}-${rec.name}`,
+					{ country: rec.country, city: rec.name, lat: rec.lat, lon: rec.lon });
+			}
+		}
+		for (let k of tmpMap) { cityMap.set(k[0], k[1]); }
+	}).catch((e) => { console.log(e); });
 };
 
 let fetchForecastData = async (appKey, lat, lon) => {
-    let result = { status: "err", msg: "unknow err" };
-    await new Promise((resolve, reject) => {
-        const buffers = [];
-        let settled = false;
-        const done = (err, data) => {
-            if (settled) return;
-            settled = true;
-            if (err) { reject(err); } else { resolve(data); }
-        };
+	let result = { status: "err", msg: "unknow err" };
+	await new Promise((resolve, reject) => {
+		const buffers = [];
+		let settled = false;
+		const done = (err, data) => {
+			if (settled) return;
+			settled = true;
+			if (err) { reject(err); } else { resolve(data); }
+		};
 
-        let request = https.get(
-            `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&mode=json&appid=${appKey}`,
-            (res) => {
-                if (res.statusCode !== 200) {
-                    res.resume();
-                    return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
-                }
-                res.on('data', (chunk) => { buffers.push(chunk); });
-                res.on('end', () => {
-                    let str = Buffer.concat(buffers).toString('utf8');
-                    try {
-                        let json = JSON.parse(str);
-                        if ('200' == json.cod) {
-                            done(null, json);
-                        } else {
-                            done(new Error(str));
-                        }
-                    } catch (e) {
-                        done(new Error(`parse json err: ${str}`));
-                    }
-                });
-                res.on('error', (err) => {
-                    done(new Error(`Response stream error: ${err.message}`));
-                });
-            });
+		let request = https.get(
+			`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&mode=json&appid=${appKey}`,
+			(res) => {
+				if (res.statusCode !== 200) {
+					res.resume();
+					return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
+				}
+				res.on('data', (chunk) => { buffers.push(chunk); });
+				res.on('end', () => {
+					let str = Buffer.concat(buffers).toString('utf8');
+					try {
+						let json = JSON.parse(str);
+						if ('200' == json.cod) {
+							done(null, json);
+						} else {
+							done(new Error(str));
+						}
+					} catch (e) {
+						done(new Error(`parse json err: ${str}`));
+					}
+				});
+				res.on('error', (err) => {
+					done(new Error(`Response stream error: ${err.message}`));
+				});
+			});
 
-        request.on('error', (err) => {
-            done(new Error(`Request error: ${err.message}`));
-        });
+		request.on('error', (err) => {
+			done(new Error(`Request error: ${err.message}`));
+		});
 
-        request.setTimeout(15000, () => {
-            request.destroy();
-            done(new Error('Request timeout'));
-        });
-    }).then((data) => {
-        result = { status: 'success', msg: '', oriData: data };
-    }).catch((e) => {
-        result.msg = e.message || e;
-    });
-    return result;
+		request.setTimeout(15000, () => {
+			request.destroy();
+			done(new Error('Request timeout'));
+		});
+	}).then((data) => {
+		result = { status: 'success', msg: '', oriData: data };
+	}).catch((e) => {
+		result.msg = e.message || e;
+	});
+	return result;
 };
 
 
@@ -155,89 +155,89 @@ weatherCode3rdMap.set('11', { "code": 0b1000000001000000, "cn": "周边有雷雨
 weatherCode3rdMap.set('13', { "code": 0b0001000000000000, "cn": "飞雪", "ens": "Blowing snow", "en": "Blowing snow" });
 
 let transWindDir = (deg) => {
-    if (deg < 22.50)       { return "N"  ; }
-    else if (deg <  45.00) { return "NNE"; }
-    else if (deg <  67.50) { return "NE" ; } 
-    else if (deg <  90.00) { return "ENE"; } 
-    else if (deg < 112.50) { return "E"  ; } 
-    else if (deg < 135.00) { return "ESE"; } 
-    else if (deg < 157.50) { return "SE" ; } 
-    else if (deg < 180.00) { return "SSE"; } 
-    else if (deg < 202.50) { return "S"  ; } 
-    else if (deg < 225.00) { return "SSW"; } 
-    else if (deg < 247.50) { return "SW" ; } 
-    else if (deg < 270.00) { return "WSW"; } 
-    else if (deg < 292.50) { return "W"  ; } 
-    else if (deg < 315.00) { return "WNW"; }
-    else if (deg < 337.50) { return "NW" ; }
-    else                   { return "NNW"; }
+	if (deg < 22.50)       { return "N"  ; }
+	else if (deg <  45.00) { return "NNE"; }
+	else if (deg <  67.50) { return "NE" ; } 
+	else if (deg <  90.00) { return "ENE"; } 
+	else if (deg < 112.50) { return "E"  ; } 
+	else if (deg < 135.00) { return "ESE"; } 
+	else if (deg < 157.50) { return "SE" ; } 
+	else if (deg < 180.00) { return "SSE"; } 
+	else if (deg < 202.50) { return "S"  ; } 
+	else if (deg < 225.00) { return "SSW"; } 
+	else if (deg < 247.50) { return "SW" ; } 
+	else if (deg < 270.00) { return "WSW"; } 
+	else if (deg < 292.50) { return "W"  ; } 
+	else if (deg < 315.00) { return "WNW"; }
+	else if (deg < 337.50) { return "NW" ; }
+	else                   { return "NNW"; }
 };
 let dayOfWeekArr = ['Sun', 'Mon', 'Thu', 'Wed', 'Thu', 'Fir', 'Sat'];
 
 let groupForecastByDay = (dayMap, rec) => {
-    let date = new Date();
-    let year  = parseInt(rec.dt_txt.substring(0,  4));
-    let month = parseInt(rec.dt_txt.substring(5,  7));
-    let day   = parseInt(rec.dt_txt.substring(8, 10));
-    date.setFullYear(year, month -1, day);
-    let dayStr = `${year}-${month}-${day}`;
-    let dayOfWeek = dayOfWeekArr[date.getDay()];
-    let data = dayMap.has(dayStr) ? dayMap.get(dayStr) : { date: "", dayOfWeek: "",
-        weatherCode: 0, preciPct: 0, tempMin: 255, tempMax: -255, windSpeed: 0, windDir: 'N' };
-    data.date = dayStr;
-    data.dayOfWeek = dayOfWeek;
-    let ccode = getWeatherCode(rec.weather[0].icon.substring(0,2));
-    // console.log(`${data.weatherCode} | ${ccode} = ${data.weatherCode | ccode} `);
-    data.weatherCode = data.weatherCode | ccode;
-    data.preciPct = data.preciPct > rec.pop * 100 ? data.preciPct : rec.pop * 100;
-    data.tempMin = data.tempMin < rec.main.temp_max ? data.tempMin : rec.main.temp_min;
-    data.tempMax = data.tempMax > rec.main.temp_max ? data.tempMax : rec.main.temp_max;
-    data.windSpeed = data.windSpeed > rec.wind.speed ? data.windSpeed : rec.wind.speed;
-    data.windDir = transWindDir(rec.wind.deg);
-    dayMap.set(dayStr, data);
+	let date = new Date();
+	let year  = parseInt(rec.dt_txt.substring(0,  4));
+	let month = parseInt(rec.dt_txt.substring(5,  7));
+	let day   = parseInt(rec.dt_txt.substring(8, 10));
+	date.setFullYear(year, month -1, day);
+	let dayStr = `${year}-${month}-${day}`;
+	let dayOfWeek = dayOfWeekArr[date.getDay()];
+	let data = dayMap.has(dayStr) ? dayMap.get(dayStr) : { date: "", dayOfWeek: "",
+		weatherCode: 0, preciPct: 0, tempMin: 255, tempMax: -255, windSpeed: 0, windDir: 'N' };
+	data.date = dayStr;
+	data.dayOfWeek = dayOfWeek;
+	let ccode = getWeatherCode(rec.weather[0].icon.substring(0,2));
+	// console.log(`${data.weatherCode} | ${ccode} = ${data.weatherCode | ccode} `);
+	data.weatherCode = data.weatherCode | ccode;
+	data.preciPct = data.preciPct > rec.pop * 100 ? data.preciPct : rec.pop * 100;
+	data.tempMin = data.tempMin < rec.main.temp_max ? data.tempMin : rec.main.temp_min;
+	data.tempMax = data.tempMax > rec.main.temp_max ? data.tempMax : rec.main.temp_max;
+	data.windSpeed = data.windSpeed > rec.wind.speed ? data.windSpeed : rec.wind.speed;
+	data.windDir = transWindDir(rec.wind.deg);
+	dayMap.set(dayStr, data);
 };
 
 let getWeatherCode = (code3rd) => {
-    let ccode = weatherCode3rdMap.get(code3rd);
-    if (ccode) {
-        return ccode;
-    } else {
-        console.log(`miss code ${ccode}`);
-        return 0b0000000000000100;
-    }
+	let ccode = weatherCode3rdMap.get(code3rd);
+	if (ccode) {
+		return ccode;
+	} else {
+		console.log(`miss code ${ccode}`);
+		return 0b0000000000000100;
+	}
 };
 
 let groupForecastByDays = (oriData) => {
-    let dayMap = new Map();
-    if (oriData && oriData.list && oriData.list.length > 0) {
-        for (let rec of oriData.list) {
-            // console.log(rec);
-            groupForecastByDay(dayMap, rec);
-        }
-        let forecastDayList = [];
-        for (let day of dayMap) {
-            forecastDayList.push(day[1]);
-        }
-        // console.log(forecastDayList);
-        return forecastDayList;
-    } else {
-        return createEmptyRecs();
-    }
+	let dayMap = new Map();
+	if (oriData && oriData.list && oriData.list.length > 0) {
+		for (let rec of oriData.list) {
+			// console.log(rec);
+			groupForecastByDay(dayMap, rec);
+		}
+		let forecastDayList = [];
+		for (let day of dayMap) {
+			forecastDayList.push(day[1]);
+		}
+		// console.log(forecastDayList);
+		return forecastDayList;
+	} else {
+		return createEmptyRecs();
+	}
 };
 
 
 exports.fetchForecast = async (appKey, lat, lon) => {
-    let now = (new Date()).getTime();
-    if (!lastCache || now - CALL_ITV - lastUpdateTime > 0) {
-        let result = await fetchForecastData(appKey, lat, lon);
-        if ('success' == result.status) {
-            lastCache = result.oriData;
-            lastUpdateTime = now;
-            return groupForecastByDays(result.oriData);
-        } else {
-            return groupForecastByDays(createEmptyRecs());
-        }
-    } else {
-        return groupForecastByDays(lastCache);
-    }
+	let now = (new Date()).getTime();
+	if (!lastCache || now - CALL_ITV - lastUpdateTime > 0) {
+		let result = await fetchForecastData(appKey, lat, lon);
+		if ('success' == result.status) {
+			lastCache = result.oriData;
+			lastUpdateTime = now;
+			return groupForecastByDays(result.oriData);
+		} else {
+			return groupForecastByDays(createEmptyRecs());
+		}
+	} else {
+		return groupForecastByDays(lastCache);
+	}
 };

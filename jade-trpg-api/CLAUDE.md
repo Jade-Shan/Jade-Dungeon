@@ -98,6 +98,7 @@ Handler 函数**不通过返回值**来响应请求，而是直接操作 `contex
 
 ## 注意事项
 
+- 所有 JavaScript 代码使用 **tab 缩进**（不使用空格缩进）。
 - 本项目没有 TypeScript、没有构建工具、没有 linter、没有单元测试框架。
 - `javascript/test.js` 是一个测试用 handler 模块，通过 `config.js` 加载后用于手动测试。
 - 代码风格是较老的 Express 写法（手动 `writeHead` + `end`），CORS 头在每个 handler 中手动设置。

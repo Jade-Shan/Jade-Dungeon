@@ -9,170 +9,170 @@ let lastCache = undefined;
 let weatherCode3rdMap = new Map();
 
 let createEmptyRecs = () => {
-    return [{
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }, {
-        location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
-        temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
-        windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
-    }];
+	return [{
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}, {
+		location: "", date: "", dayOfWeek: "", weatherCode: 0, weatherDesc: '', moonPhase: 1, uv: 0,
+		temp: 0, tempBodyFeel: 0, tempMin: 0, tempMax: 0, atmPressure: 0,
+		windSpeed: 0, windDir: 'N', humedPct: 0, preciPct: 0, sunrise: '', sunset: ''
+	}];
 }
 
 
 exports.fetchForecast = async (appKey, cityName, days) => {
-    let now = (new Date()).getTime();
-    if (!lastCache || now - CALL_ITV - lastUpdateTime > 0) {
-        let data = await fetchForecastData(appKey, cityName, days);
-        if ('success' == data.status) {
-            data.forecastDays = transForecastFormatFontText(data.oriData);
-            lastCache = data;
-            lastUpdateTime = now;
-        } else {
-            data.forecastDays = createEmptyRecs();
-        }
-        lastCache = data;
-    }
-    return lastCache;
+	let now = (new Date()).getTime();
+	if (!lastCache || now - CALL_ITV - lastUpdateTime > 0) {
+		let data = await fetchForecastData(appKey, cityName, days);
+		if ('success' == data.status) {
+			data.forecastDays = transForecastFormatFontText(data.oriData);
+			lastCache = data;
+			lastUpdateTime = now;
+		} else {
+			data.forecastDays = createEmptyRecs();
+		}
+		lastCache = data;
+	}
+	return lastCache;
 };
 
 let fetchForecastData = async (appKey, cityName, days) => {
-    let result = { status: "err", msg: "unknow err" };
-    await new Promise((resolve, reject) => {
-        const buffers = [];
-        let settled = false;
-        const done = (err, data) => {
-            if (settled) return;
-            settled = true;
-            if (err) { reject(err); } else { resolve(data); }
-        };
+	let result = { status: "err", msg: "unknow err" };
+	await new Promise((resolve, reject) => {
+		const buffers = [];
+		let settled = false;
+		const done = (err, data) => {
+			if (settled) return;
+			settled = true;
+			if (err) { reject(err); } else { resolve(data); }
+		};
 
-        let request = https.get(
-            `https://api.weatherapi.com/v1/forecast.json?key=${appKey}&q=${cityName}&days=${days}&aqi=no&alerts=no`,
-            (res) => {
-                if (res.statusCode !== 200) {
-                    // 消费响应体以防内存泄漏，然后 reject
-                    res.resume();
-                    return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
-                }
-                res.on('data', (chunk) => { buffers.push(chunk); });
-                res.on('end', () => {
-                    let str = Buffer.concat(buffers).toString('utf8');
-                    try {
-                        done(null, JSON.parse(str));
-                    } catch (e) {
-                        done(new Error(`parse json err: ${str}`));
-                    }
-                });
-                res.on('error', (err) => {
-                    done(new Error(`Response stream error: ${err.message}`));
-                });
-            });
+		let request = https.get(
+			`https://api.weatherapi.com/v1/forecast.json?key=${appKey}&q=${cityName}&days=${days}&aqi=no&alerts=no`,
+			(res) => {
+				if (res.statusCode !== 200) {
+					// 消费响应体以防内存泄漏，然后 reject
+					res.resume();
+					return done(new Error(`Server HTTP Err Code: ${res.statusCode}`));
+				}
+				res.on('data', (chunk) => { buffers.push(chunk); });
+				res.on('end', () => {
+					let str = Buffer.concat(buffers).toString('utf8');
+					try {
+						done(null, JSON.parse(str));
+					} catch (e) {
+						done(new Error(`parse json err: ${str}`));
+					}
+				});
+				res.on('error', (err) => {
+					done(new Error(`Response stream error: ${err.message}`));
+				});
+			});
 
-        request.on('error', (err) => {
-            done(new Error(`Request error: ${err.message}`));
-        });
+		request.on('error', (err) => {
+			done(new Error(`Request error: ${err.message}`));
+		});
 
-        request.setTimeout(15000, () => {
-            request.destroy();
-            done(new Error('Request timeout'));
-        });
-    }).then((data) => {
-        result = { status: 'success', msg: '', oriData: data };
-    }).catch((e) => {
-        result.msg = e.message || e;
-    });
-    return result;
+		request.setTimeout(15000, () => {
+			request.destroy();
+			done(new Error('Request timeout'));
+		});
+	}).then((data) => {
+		result = { status: 'success', msg: '', oriData: data };
+	}).catch((e) => {
+		result.msg = e.message || e;
+	});
+	return result;
 };
 
 let transForecastFormatFontText = (oriData) => {
-    let forecastDays = createEmptyRecs();
-    // console.log(oriData);
-    forecastDays[0].location = `${oriData.location.region}, ${oriData.location.country}`;
-    forecastDays[0].date = '';
-    forecastDays[0].weatherDesc = oriData.current.condition.text;
-    forecastDays[0].humedPct = oriData.current.humidity;
-    forecastDays[0].moonPhase = oriData.forecast.forecastday[0].astro.moon_phase;
-    forecastDays[0].temp = oriData.current.temp_c;
-    forecastDays[0].tempBodyFeel = oriData.current.feelslike_c;
-    forecastDays[0].atmPressure = oriData.current.pressure_mb;
-    forecastDays[0].sunrise = oriData.forecast.forecastday[0].astro.sunrise;
-    forecastDays[0].sunset = oriData.forecast.forecastday[0].astro.sunset;
+	let forecastDays = createEmptyRecs();
+	// console.log(oriData);
+	forecastDays[0].location = `${oriData.location.region}, ${oriData.location.country}`;
+	forecastDays[0].date = '';
+	forecastDays[0].weatherDesc = oriData.current.condition.text;
+	forecastDays[0].humedPct = oriData.current.humidity;
+	forecastDays[0].moonPhase = oriData.forecast.forecastday[0].astro.moon_phase;
+	forecastDays[0].temp = oriData.current.temp_c;
+	forecastDays[0].tempBodyFeel = oriData.current.feelslike_c;
+	forecastDays[0].atmPressure = oriData.current.pressure_mb;
+	forecastDays[0].sunrise = oriData.forecast.forecastday[0].astro.sunrise;
+	forecastDays[0].sunset = oriData.forecast.forecastday[0].astro.sunset;
 
-    let today = new Date();
-    let tomorrow = (new Date());
-    tomorrow.setTime(today.getTime() + 24 * 60 * 60 * 1000);
-    let dfTomorrow = (new Date());
-    dfTomorrow.setTime(tomorrow.getTime() + 24 * 60 * 60 * 1000);
-    let dgTomorrow = (new Date());
-    dgTomorrow.setTime(dfTomorrow.getTime() + 24 * 60 * 60 * 1000);
-    let dhTomorrow = (new Date());
-    dhTomorrow.setTime(dgTomorrow.getTime() + 24 * 60 * 60 * 1000);
+	let today = new Date();
+	let tomorrow = (new Date());
+	tomorrow.setTime(today.getTime() + 24 * 60 * 60 * 1000);
+	let dfTomorrow = (new Date());
+	dfTomorrow.setTime(tomorrow.getTime() + 24 * 60 * 60 * 1000);
+	let dgTomorrow = (new Date());
+	dgTomorrow.setTime(dfTomorrow.getTime() + 24 * 60 * 60 * 1000);
+	let dhTomorrow = (new Date());
+	dhTomorrow.setTime(dgTomorrow.getTime() + 24 * 60 * 60 * 1000);
 
-    forecastDays[0].dayOfWeek = today.toDateString().split(' ')[0];
-    forecastDays[0].weatherCode = getWeatherCode(oriData.current.condition.code);
-    forecastDays[0].windSpeed = oriData.current.wind_kph;
-    forecastDays[0].windDir = oriData.current.wind_dir;
-    forecastDays[0].tempMin = oriData.forecast.forecastday[0].day.mintemp_c;
-    forecastDays[0].tempMax = oriData.forecast.forecastday[0].day.maxtemp_c;
-    let rainChance0 = oriData.forecast.forecastday[0].day.daily_chance_of_rain;
-    let snowChance0 = oriData.forecast.forecastday[0].day.daily_chance_of_snow;
-    forecastDays[0].preciPct = rainChance0 > snowChance0 ? rainChance0 : snowChance0;
+	forecastDays[0].dayOfWeek = today.toDateString().split(' ')[0];
+	forecastDays[0].weatherCode = getWeatherCode(oriData.current.condition.code);
+	forecastDays[0].windSpeed = oriData.current.wind_kph;
+	forecastDays[0].windDir = oriData.current.wind_dir;
+	forecastDays[0].tempMin = oriData.forecast.forecastday[0].day.mintemp_c;
+	forecastDays[0].tempMax = oriData.forecast.forecastday[0].day.maxtemp_c;
+	let rainChance0 = oriData.forecast.forecastday[0].day.daily_chance_of_rain;
+	let snowChance0 = oriData.forecast.forecastday[0].day.daily_chance_of_snow;
+	forecastDays[0].preciPct = rainChance0 > snowChance0 ? rainChance0 : snowChance0;
 
-    forecastDays[1].dayOfWeek = tomorrow.toDateString().split(' ')[0];
-    forecastDays[1].weatherCode = getWeatherCode(oriData.forecast.forecastday[1].day.condition.code);
-    forecastDays[1].windSpeed = oriData.forecast.forecastday[1].day.maxwind_kph;
-    forecastDays[1].windDir = oriData.forecast.forecastday[1].hour[10].wind_dir;
-    forecastDays[1].tempMin = oriData.forecast.forecastday[1].day.mintemp_c;
-    forecastDays[1].tempMax = oriData.forecast.forecastday[1].day.maxtemp_c;
-    let rainChance1 = oriData.forecast.forecastday[1].day.daily_chance_of_rain;
-    let snowChance1 = oriData.forecast.forecastday[1].day.daily_chance_of_snow;
-    forecastDays[1].preciPct = rainChance1 > snowChance1 ? rainChance1 : snowChance1;
+	forecastDays[1].dayOfWeek = tomorrow.toDateString().split(' ')[0];
+	forecastDays[1].weatherCode = getWeatherCode(oriData.forecast.forecastday[1].day.condition.code);
+	forecastDays[1].windSpeed = oriData.forecast.forecastday[1].day.maxwind_kph;
+	forecastDays[1].windDir = oriData.forecast.forecastday[1].hour[10].wind_dir;
+	forecastDays[1].tempMin = oriData.forecast.forecastday[1].day.mintemp_c;
+	forecastDays[1].tempMax = oriData.forecast.forecastday[1].day.maxtemp_c;
+	let rainChance1 = oriData.forecast.forecastday[1].day.daily_chance_of_rain;
+	let snowChance1 = oriData.forecast.forecastday[1].day.daily_chance_of_snow;
+	forecastDays[1].preciPct = rainChance1 > snowChance1 ? rainChance1 : snowChance1;
 
-    forecastDays[2].windDir = oriData.forecast.forecastday[2].hour[10].wind_dir;
-    forecastDays[2].dayOfWeek = dfTomorrow.toDateString().split(' ')[0];
-    forecastDays[2].weatherCode = getWeatherCode(oriData.forecast.forecastday[2].day.condition.code);
-    forecastDays[2].windSpeed = oriData.forecast.forecastday[2].day.maxwind_kph;
-    forecastDays[2].tempMin = oriData.forecast.forecastday[2].day.mintemp_c;
-    forecastDays[2].tempMax = oriData.forecast.forecastday[2].day.maxtemp_c;
-    let rainChance2 = oriData.forecast.forecastday[2].day.daily_chance_of_rain;
-    let snowChance2 = oriData.forecast.forecastday[2].day.daily_chance_of_snow;
-    forecastDays[2].preciPct = rainChance2 > snowChance2 ? rainChance2 : snowChance2;
+	forecastDays[2].windDir = oriData.forecast.forecastday[2].hour[10].wind_dir;
+	forecastDays[2].dayOfWeek = dfTomorrow.toDateString().split(' ')[0];
+	forecastDays[2].weatherCode = getWeatherCode(oriData.forecast.forecastday[2].day.condition.code);
+	forecastDays[2].windSpeed = oriData.forecast.forecastday[2].day.maxwind_kph;
+	forecastDays[2].tempMin = oriData.forecast.forecastday[2].day.mintemp_c;
+	forecastDays[2].tempMax = oriData.forecast.forecastday[2].day.maxtemp_c;
+	let rainChance2 = oriData.forecast.forecastday[2].day.daily_chance_of_rain;
+	let snowChance2 = oriData.forecast.forecastday[2].day.daily_chance_of_snow;
+	forecastDays[2].preciPct = rainChance2 > snowChance2 ? rainChance2 : snowChance2;
 
-    forecastDays[3].windDir     = 'N';
-    forecastDays[3].dayOfWeek   = dgTomorrow.toDateString().split(' ')[0];
-    forecastDays[3].weatherCode = 1000000;
-    forecastDays[3].windSpeed   = 0;
-    forecastDays[3].tempMin     = 0;
-    forecastDays[3].tempMax     = 0;
-    forecastDays[3].preciPct    = 0;
+	forecastDays[3].windDir     = 'N';
+	forecastDays[3].dayOfWeek   = dgTomorrow.toDateString().split(' ')[0];
+	forecastDays[3].weatherCode = 1000000;
+	forecastDays[3].windSpeed   = 0;
+	forecastDays[3].tempMin     = 0;
+	forecastDays[3].tempMax     = 0;
+	forecastDays[3].preciPct    = 0;
 
-    forecastDays[4].windDir     = 'N';
-    forecastDays[4].dayOfWeek   = dhTomorrow.toDateString().split(' ')[0];
-    forecastDays[4].weatherCode = 1000000;
-    forecastDays[4].windSpeed   = '0';
-    forecastDays[4].tempMin     = '0';
-    forecastDays[4].tempMax     = '0';
-    forecastDays[4].preciPct    = '0';
-    return forecastDays;
+	forecastDays[4].windDir     = 'N';
+	forecastDays[4].dayOfWeek   = dhTomorrow.toDateString().split(' ')[0];
+	forecastDays[4].weatherCode = 1000000;
+	forecastDays[4].windSpeed   = '0';
+	forecastDays[4].tempMin     = '0';
+	forecastDays[4].tempMax     = '0';
+	forecastDays[4].preciPct    = '0';
+	return forecastDays;
 }
 
 let getWeatherCode = (code3rd) => {
-    let ccode = weatherCode3rdMap.get(code3rd);
-    return ccode ? ccode.code : 0b0000000000000100;
+	let ccode = weatherCode3rdMap.get(code3rd);
+	return ccode ? ccode.code : 0b0000000000000100;
 }
 
 weatherCode3rdMap.set(1000, { "code": 0b0000000000000000,"cn": "晴天", "ens": "Clear", "en": "Clear" });

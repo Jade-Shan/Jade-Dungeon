@@ -18,29 +18,29 @@ config.globalCfg.redis.forEach(async (e) => {
 });
 
 let callRedis = async (callback) => {
-    return new Promise((resolve, reject) => {
-        callback((err, reply) => {
-            if (err) { reject(err); } else { resolve(reply); }
-        });
-    });
+	return new Promise((resolve, reject) => {
+		callback((err, reply) => {
+			if (err) { reject(err); } else { resolve(reply); }
+		});
+	});
 };
 
 exports.connect = (connName) => {
-    let conn = connMap.get(connName);
-    return {
-        call: async (func) => {
-            let resp = { isSuccess: false, data: null, err: null };
-            await callRedis((callback) => {
-                func(conn, callback);
-            }).then((reply) => { 
-                resp.isSuccess = true;
-                resp.data = reply; 
-            }).catch((err) => { 
-                resp.err = err;
-            });;
-            return resp;
-        }
-    };
+	let conn = connMap.get(connName);
+	return {
+		call: async (func) => {
+			let resp = { isSuccess: false, data: null, err: null };
+			await callRedis((callback) => {
+				func(conn, callback);
+			}).then((reply) => { 
+				resp.isSuccess = true;
+				resp.data = reply; 
+			}).catch((err) => { 
+				resp.err = err;
+			});;
+			return resp;
+		}
+	};
 };
 
 exports.connectV4 = (connName) => {
