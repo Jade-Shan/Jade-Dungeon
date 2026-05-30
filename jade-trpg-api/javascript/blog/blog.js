@@ -101,7 +101,7 @@ exports.handler = {
 				'Access-Control-Allow-Headers': 'x-requested-with,content-type'
 			});
 		}
-		await context.response.write(JSON.stringify(json));
+		await context.response.end(JSON.stringify(json));
 	},
 	"/api/blog/save": async (context, data) => {
 		let now    = (new Date()).getTime();
@@ -136,6 +136,6 @@ exports.handler = {
 				'Access-Control-Allow-Headers': 'x-requested-with,content-type'
 			});
 		}
-		await context.response.write(JSON.stringify(json));
+		await context.response.end(JSON.stringify(json));
 	},
 };
