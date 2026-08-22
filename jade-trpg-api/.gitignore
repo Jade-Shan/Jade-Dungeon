@@ -4,3 +4,4 @@ deploy-rls.sh
 patch.tar.gz
 backup-rls.sh
 package-lock.json
+local-notes.md
